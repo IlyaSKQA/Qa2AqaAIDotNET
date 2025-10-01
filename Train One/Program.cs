@@ -1,2 +1,6 @@
-﻿// See https://aka.ms/new-console-template for more information
+﻿
+//SPDEV-515 issue solution for first task:
+
+using System.Collections.Generic;
+
 Console.WriteLine("Hello, World!");
