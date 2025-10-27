@@ -18,20 +18,12 @@ namespace TrainOne.Tests
     {
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
-        private FileStorage storage;
-
-        [SetUp]
-        public void Setup()
-        {
-            storage = new FileStorage(); // создаём fresh storage для каждого теста
-            Logger.Info("Setup new FileStorage instance for test.");
-        }
-
         [Test]
-        public void DefaultConstructor_Should_Have_MaxSize100_And_AvailableSize200()
+        public void Storage_Should_Be_Successfully_Created_With_Default_Constructor()
         {
+            var storage = new FileStorage();
             var files = storage.GetFiles();
-            
+
             files.Should().BeEmpty();
 
             Logger.Info("Default constructor test passed.");
@@ -40,8 +32,8 @@ namespace TrainOne.Tests
         [Test]
         public void ConstructorWithSize_Should_InitializeProperly()
         {
-            var customStorage = new FileStorage(50);
-            var files = customStorage.GetFiles();
+            var storage = new FileStorage(50);
+            var files = storage.GetFiles();
 
             files.Should().BeEmpty();
 
@@ -51,7 +43,8 @@ namespace TrainOne.Tests
         [Test]
         public void Write_Should_Add_File_When_Unique_And_Size_Fits()
         {
-            var file = new File("test.txt", new string('a', 50)); // size = 25
+            var storage = new FileStorage();
+            var file = new File("test.txt", new string('a', 50));
             var result = storage.Write(file);
 
             result.Should().BeTrue();
@@ -64,10 +57,11 @@ namespace TrainOne.Tests
         [Test]
         public void Write_Should_Throw_When_FileNameAlreadyExists()
         {
+            var storage = new FileStorage();
             var file1 = new File("duplicate.txt", "1234");
-            var file2 = new File("duplicate.txt", "5678");            
+            var file2 = new File("duplicate.txt", "5678");
             storage.Write(file1);
-            
+
             var act = () => storage.Write(file2);
 
             act.Should().Throw<FileNameAlreadyExistsException>();
@@ -78,7 +72,8 @@ namespace TrainOne.Tests
         [Test]
         public void Write_Should_Return_False_When_File_Too_Large()
         {
-            var largeContent = new string('a', 500); // size = 250 > default available
+            var storage = new FileStorage();
+            var largeContent = new string('a', 500);
             var largeFile = new File("big.txt", largeContent);
             var result = storage.Write(largeFile);
 
@@ -91,6 +86,7 @@ namespace TrainOne.Tests
         [Test]
         public void IsExists_Should_Return_True_If_File_Added()
         {
+            var storage = new FileStorage();
             var file = new File("exists.txt", "content");
             storage.Write(file);
 
@@ -104,6 +100,7 @@ namespace TrainOne.Tests
         [Test]
         public void IsExists_Should_Return_False_If_File_Not_Added()
         {
+            var storage = new FileStorage();
             var exists = storage.IsExists("nonexistent.txt");
 
             exists.Should().BeFalse();
@@ -114,6 +111,7 @@ namespace TrainOne.Tests
         [Test]
         public void Delete_Should_Remove_Existing_File()
         {
+            var storage = new FileStorage();
             var file = new File("delete.txt", "abc");
             storage.Write(file);
 
@@ -128,6 +126,7 @@ namespace TrainOne.Tests
         [Test]
         public void Delete_Should_Return_False_If_File_Not_Found()
         {
+            var storage = new FileStorage();
             var result = storage.Delete("notfound.txt");
 
             result.Should().BeFalse();
@@ -138,6 +137,7 @@ namespace TrainOne.Tests
         [Test]
         public void GetFiles_Should_Return_All_Added_Files()
         {
+            var storage = new FileStorage();
             var file1 = new File("f1.txt", "1234");
             var file2 = new File("f2.txt", "5678");
             storage.Write(file1);
@@ -155,13 +155,13 @@ namespace TrainOne.Tests
         [Test]
         public void GetFile_Should_Return_File_When_Exists()
         {
+            var storage = new FileStorage();
             var file = new File("getme.txt", "abc");
             storage.Write(file);
 
             var retrieved = storage.GetFile("getme.txt");
 
-            retrieved.Should().NotBeNull();
-            retrieved.GetFileName().Should().Be("getme.txt");
+            retrieved.Should().BeEquivalentTo(file);
 
             Logger.Info("GetFile existing file test passed.");
         }
@@ -169,11 +169,41 @@ namespace TrainOne.Tests
         [Test]
         public void GetFile_Should_Return_Null_When_File_Not_Found()
         {
+            var storage = new FileStorage();
             var retrieved = storage.GetFile("nofile.txt");
 
             retrieved.Should().BeNull();
 
             Logger.Info("GetFile non-existent file test passed.");
         }
+
+        [Test]
+        public void File_Constructor_Should_Set_Name_And_Size_Correctly()
+        {
+            var fileName = "sample.txt";
+            var content = "abcd";
+            var file = new File(fileName, content);
+
+            file.GetFileName().Should().Be(fileName);
+            file.GetSize().Should().Be(content.Length / 2.0);
+
+            Logger.Info("File constructor sets name and size correctly.");
+        }
+
+        [Test]
+        public void Constructor_Should_Handle_FileName_Without_Extension()
+        {
+            var fileName = "readme";
+            var content = "hello";
+            var file = new File(fileName, content);
+
+            file.GetFileName().Should().Be(fileName);
+
+            var expected = (double)(content.Length / 2);
+            file.GetSize().Should().Be(expected);
+
+            Logger.Info("File name without extension handled correctly.");
+        }
     }
 }
+

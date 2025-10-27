@@ -25,9 +25,9 @@ namespace TrainOne.Tests
             var file = new File(fileName, content);
 
             file.GetFileName().Should().Be(fileName);
-            file.GetSize().Should().Be(content.Length / 2);
 
-            Logger.Info("Constructor valid input test passed successfully.");
+            var expected = (double)(content.Length / 2);
+            file.GetSize().Should().Be(expected);
         }
 
         [Test]
@@ -38,9 +38,9 @@ namespace TrainOne.Tests
             var file = new File(fileName, content);
 
             file.GetFileName().Should().Be(fileName);
-            file.GetSize().Should().Be(content.Length / 2);
 
-            Logger.Info("Constructor without extension test passed successfully.");
+            var expected = (double)(content.Length / 2);
+            file.GetSize().Should().Be(expected);
         }
 
         [Test]
@@ -49,8 +49,6 @@ namespace TrainOne.Tests
             var file = new File("empty.txt", "");
             var size = file.GetSize();
             size.Should().Be(0);
-
-            Logger.Info("GetSize empty content test passed successfully.");
         }
 
         [Test]
@@ -60,8 +58,6 @@ namespace TrainOne.Tests
             var result = file.GetFileName();
 
             result.Should().Be("myfile.log");
-
-            Logger.Info("GetFileName test passed successfully.");
         }
 
         [Test]
@@ -95,8 +91,6 @@ namespace TrainOne.Tests
 
             size1.Should().Be(size2);
             name1.Should().Be(name2);
-
-            Logger.Info("Multiple call consistency test passed successfully.");
         }
     }
 }
